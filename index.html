@@ -587,7 +587,7 @@ input.blank.tiny{ width:58px; } /* slightly narrower */
                         <circle cx="352" cy="156" r="56" fill="url(#gNode)" stroke="rgba(14,165,233,0.55)" stroke-width="10"/>
                         <text x="352" y="128" text-anchor="middle" font-size="14" font-weight="900" fill="#64748b">ones</text>
                         <foreignObject x="310" y="142" width="84" height="60">
-                          <div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;justify-content:center;">
+                          <div xmlns="http://www.w3.org/199/xhtml" style="display:flex;justify-content:center;">
                             <input class="blank pillLike" id="ones" inputmode="numeric" autocomplete="off" aria-label="ones part"/>
                           </div>
                         </foreignObject>
@@ -699,6 +699,54 @@ input.blank.tiny{ width:58px; } /* slightly narrower */
       </div>
     </div>
   </div>
+
+  <!-- ✅ Main Menu (bottom centre, positioned to avoid blocking the stage when possible) -->
+  <button class="ghost" id="btnMainMenuBottom" type="button"
+    style="position:fixed;left:50%;z-index:10000;transform:translateX(-50%);border-radius:999px;padding:10px 14px;font-size:12px;">
+    ⬅ Main Menu
+  </button>
+  <script>
+    (function(){
+      const BTN_ID = "btnMainMenuBottom";
+      const WRAP_ID = "stageWrap";
+      const MENU_URL = "https://limkimsze-maker.github.io/P3_Mental_Sum_Challenge/";
+
+      function positionBtn(){
+        const btn = document.getElementById(BTN_ID);
+        const wrap = document.getElementById(WRAP_ID);
+        if(!btn || !wrap) return;
+
+        requestAnimationFrame(()=>{
+          const r = wrap.getBoundingClientRect();
+          const gap = 8;
+
+          // Try to sit just below the stageWrap; if no room, pin to bottom.
+          const bh = btn.offsetHeight || 36;
+          let top = r.bottom + gap;
+          const maxTop = window.innerHeight - bh - gap;
+
+          if(top > maxTop) top = maxTop;
+          if(top < gap) top = gap;
+
+          btn.style.top = top + "px";
+        });
+      }
+
+      window.addEventListener("DOMContentLoaded", ()=>{
+        const btn = document.getElementById(BTN_ID);
+        if(btn){
+          btn.addEventListener("click", ()=>{ window.location.href = MENU_URL; });
+        }
+        positionBtn();
+      });
+
+      window.addEventListener("resize", positionBtn);
+      if(window.visualViewport){
+        window.visualViewport.addEventListener("resize", positionBtn);
+        window.visualViewport.addEventListener("scroll", positionBtn);
+      }
+    })();
+  </script>
 
   <!-- Sound kit (generic) -->
   <script>
@@ -1094,4 +1142,3 @@ input.blank.tiny{ width:58px; } /* slightly narrower */
   <script src="https://limkimsze-maker.github.io/assets/nav.js"></script>
 </body>
 </html>
-
