@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- /standard (Kim Sze) -->
+  <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
+  <link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
+
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Subtract the tens, then subtract the ones — Step-by-step Practice</title>
+
+  <!-- ✅ Always-Clear on Load (Default Build Contract) -->
+  <script>
+  (function(){
+    const ACTIVITY_ID = "https://limkimsze-maker.github.io/Subtract_Tens_Then_Ones_Method1/";
+    try{
+      const toDelete = [];
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(!k) continue;
+        if(k === ACTIVITY_ID) toDelete.push(k);
+        if(k.startsWith(ACTIVITY_ID+"::")) toDelete.push(k);
+        if(k.startsWith("sls_scope::"+ACTIVITY_ID)) toDelete.push(k);
+        if(k.startsWith("UFCO-firstSubmit::"+ACTIVITY_ID)) toDelete.push(k);
+        if(k.startsWith("sls_unlike_payload::"+ACTIVITY_ID)) toDelete.push(k);
+        if(k.startsWith("sls_unlike_payload::"+ACTIVITY_ID+"::")) toDelete.push(k);
+        if(k.startsWith("UFCO-")) toDelete.push(k);
+      }
+      toDelete.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+
+      try{
+        sessionStorage.removeItem("UFCO-audio-unlocked");
+        sessionStorage.removeItem("UFCO-complete");
+      }catch(e){}
+
+      try{
+        const bc = new BroadcastChannel("xapi-state");
+        bc.postMessage({type:"clear", activityId: ACTIVITY_ID, ts: Date.now()});
+        bc.close();
+      }catch(e){}
+    }catch(e){}
+  })();
+  </script>
+
+  <style>
+    :root{
+      --bgA:#f6fbff; --bgB:#fff7ed;
+      --card:rgba(255,255,255,.92);
+      --ink:#0f172a; --muted:#64748b;
+      --line:#e2e8f0;
+      --good:#16a34a; --bad:#dc2626; --warn:#f59e0b;
+      --accent:#0ea5e9; --accent2:#a855f7;
+      --orange:#f59e0b; --blue:#0ea5e9;
+      --shadow:0 18px 44px rgba(2,6,23,.12);
+      --radius:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+
+    html, body{
+      width:100%; height:100%; margin:0;
+      overflow:hidden;
+      position:fixed;
+      overscroll-behavior:none;
+      touch-action:manipulation;
+      font-family:var(--font);
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 700px at 15% 5%, rgba(14,165,233,.18), transparent 60%),
+        radial-gradient(1200px 700px at 85% 10%, rgba(168,85,247,.14), transparent 60%),
+        radial-gradient(900px 500px at 50% 90%, rgba(245,158,11,.10), transparent 62%),
+        linear-gradient(180deg, var(--bgA), var(--bgB));
+    }
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      background: repeating-linear-gradient(45deg,
+        rgba(15,23,42,.03) 0 8px,
+        rgba(15,23,42,0) 8px 16px);
+      pointer-events:none;
+      mix-blend-mode:multiply;
+      opacity:.28;
+    }
+
+    .viewport{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .stageWrap{ position:relative; width: 920px; height: 560px; overflow:hidden; }
+    .stage{
+      width: 920px; height: 560px;
+      transform-origin: top left;
+      will-change: transform;
+      position:absolute; inset:0;
+      overflow:hidden;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+      padding: 2px 8px 6px 8px;
+      height: 42px;
+    }
+    .title{ font-weight:950; letter-spacing:.2px; line-height:1.05; font-size:17px; }
+    .subtitle{ margin-top:2px; color:var(--muted); font-size:10px; line-height:1.15; }
+
+    .badges{ display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:nowrap; }
+    .pill{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.86);
+      box-shadow:0 10px 22px rgba(2,6,23,.08);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      display:flex; gap:7px; align-items:center;
+      user-select:none;
+      backdrop-filter: blur(8px);
+      white-space:nowrap;
+    }
+    .dot{ width:10px; height:10px; border-radius:50%; background:var(--warn); box-shadow:0 0 0 4px rgba(245,158,11,.18); }
+    .dot.ok{ background:var(--good); box-shadow:0 0 0 4px rgba(22,163,74,.18); }
+
+    .panel{
+      margin: 0 8px 6px 8px;
+      height: calc(100% - 48px);
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:10px;
+      overflow:hidden;
+      position:relative;
+      backdrop-filter: blur(10px);
+    }
+    .panel:before{
+      content:"";
+      position:absolute;
+      width:200px; height:200px;
+      right:-80px; top:-80px;
+      border-radius:56px;
+      background: radial-gradient(circle at 30% 30%, rgba(14,165,233,.32), rgba(168,85,247,.16), transparent 70%);
+      transform: rotate(18deg);
+      pointer-events:none;
+    }
+
+    .layout{
+      height:100%;
+      display:grid;
+      grid-template-columns: 1fr 170px;
+      gap:10px;
+      align-items:stretch;
+      position:relative;
+      z-index:1;
+      min-height:0;
+      overflow:hidden;
+    }
+
+    .mainCard{
+      height:100%;
+      background: rgba(255,255,255,.94);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:8px;
+      overflow:hidden;
+      display:grid;
+      grid-template-rows: auto 1fr;
+      gap:8px;
+      min-height:0;
+    }
+    .qHeader{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .eqBig{
+      display:flex; align-items:baseline; gap:10px;
+      flex-wrap:nowrap; white-space:nowrap;
+      font-weight:950; letter-spacing:.2px;
+      font-size:22px;
+    }
+    .eqBig .op{ color:var(--muted); font-weight:900; }
+    .hint{
+      color:var(--muted);
+      font-size:10px;
+      line-height:1.15;
+      text-align:right;
+      max-width: 380px;
+    }
+
+    .mid{
+      min-height:0;
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:10px;
+      overflow:hidden;
+    }
+
+    .leftBoard{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px;
+      background:
+        radial-gradient(700px 240px at 25% 40%, rgba(14,165,233,.10), transparent 60%),
+        radial-gradient(700px 240px at 75% 40%, rgba(168,85,247,.10), transparent 60%),
+        rgba(255,255,255,.96);
+      overflow:hidden;
+      display:grid;
+      grid-template-rows: auto auto 1fr;
+      gap:10px;
+      min-height:0;
+    }
+
+    .bondBox{
+      width:100%;
+      height:220px;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.06);
+      background: radial-gradient(520px 240px at 50% 30%, rgba(255,255,255,.95), rgba(255,255,255,.60));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .workLines{
+      display:grid;
+      gap:8px;
+      font-weight:950;
+      font-size:18px;
+      line-height:1.15;
+      padding:2px 2px;
+    }
+    .workLines .dim{ color:var(--muted); font-weight:900; }
+    .workLines .eqRow{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+    .finalPill{
+      margin-top:auto;
+      border-radius:16px;
+      padding:12px 12px;
+      background: rgba(14,165,233,.08);
+      border:1px solid rgba(14,165,233,.18);
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:10px;
+      font-weight:950;
+      font-size:22px;
+      letter-spacing:.2px;
+      overflow:hidden;
+      white-space:nowrap;
+    }
+
+    .stepsCol{
+      display:grid;
+      grid-template-rows: 1fr 1fr;
+      gap:10px;
+      overflow:hidden;
+      min-height:0;
+    }
+   .stepCard{
+  border-radius:16px;
+  background:rgba(255,255,255,.96);
+  border:2px solid var(--line);
+  padding:12px 12px;          /* a bit more breathing room */
+  overflow:hidden;
+  display:grid;
+  grid-template-rows: auto auto 1fr;
+  gap:6px;
+  min-height:0;
+}
+
+/* ✅ Step 2: reduce font sizes so everything fits inside the blue container */
+.stepCard.blue .stepTitle .label{ font-size:16px; }
+.stepCard.blue .stepDesc{ font-size:12px; line-height:1.2; }
+.stepCard.blue .stepEq{ font-size:15px; }
+
+    .stepCard.orange{ border-color: rgba(245,158,11,.75); }
+    .stepCard.blue{ border-color: rgba(14,165,233,.75); }
+
+    .stepTitle{
+  display:flex; gap:8px; align-items:baseline;
+  font-weight:950; letter-spacing:.2px;
+}
+.stepTitle .label{
+  font-size: clamp(14px, 1.6vw, 16px);
+  text-decoration: underline;
+}
+
+.stepDesc{
+  font-weight:900;
+  font-size: clamp(11px, 1.35vw, 13px);
+  color:var(--ink);
+  line-height:1.15;
+}
+
+/* Step equations: smaller + tighter so they stay inside the card */
+.stepEq{
+  font-weight:950;
+  font-size: clamp(13px, 1.6vw, 15px);
+  display:grid;
+  gap:6px;
+  align-content:start;
+}
+.stepEq .row{ gap:8px; }
+
+    .stepEq .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .stepEq .dim{ color:var(--muted); font-weight:900; }
+
+    /* Inputs */
+    input.blank{
+  width:74px;
+  height:30px;
+  border-radius:12px;
+  border:2px solid var(--line);
+  padding:0 8px;
+  font-size:14px; /* smaller */
+  font-weight:950;
+  text-align:center;
+  outline:none;
+  background:#fff;
+  line-height:30px;
+}
+/* ✅ Make STEP 2 smaller only */
+.stepCard.blue{
+  padding: 8px 8px;              /* tighter */
+}
+.stepCard.blue .stepTitle .label{
+  font-size: 14px;               /* smaller STEP 2 title */
+}
+.stepCard.blue .stepDesc{
+  font-size: 12px;               /* smaller STEP 2 sentence */
+}
+.stepCard.blue .stepEq{
+  font-size: 14px;               /* smaller STEP 2 equation text */
+  gap: 6px;
+}
+
+/* STEP 2 row spacing tighter */
+.stepCard.blue .stepEq .row{
+  gap: 6px;
+}
+
+/* STEP 2 number pills smaller */
+.stepCard.blue .stepEq span[style*="border:2px solid rgba(22,163,74"]{
+  padding: 5px 10px !important;
+  font-size: 14px !important;
+}
+/* keep STEP 2 equation tidy and not oversized */
+.stepCard.blue .stepEq .row{
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+
+/* STEP 2 input boxes smaller (if Step 2 uses inputs in other versions) */
+.stepCard.blue input.blank,
+.stepCard.blue input.blank.tiny{
+  height: 28px;
+  line-height: 28px;
+  font-size: 13px;
+}
+.stepCard.blue input.blank.tiny{
+  width: 56px;
+}
+
+input.blank.tiny{ width:58px; } /* slightly narrower */
+
+    input.blank.pillLike{ width:72px; border-radius:999px; }
+    input.blank:focus{
+      border-color: rgba(14,165,233,.75);
+      box-shadow:0 0 0 4px rgba(14,165,233,.16);
+    }
+    .okField{ border-color: rgba(22,163,74,.92)!important; box-shadow:0 0 0 4px rgba(22,163,74,.14)!important; }
+    .badField{ border-color: rgba(220,38,38,.92)!important; box-shadow:0 0 0 4px rgba(220,38,38,.12)!important; }
+
+    .pillAns{
+      padding:6px 12px;
+      border:2px solid rgba(22,163,74,.55);
+      border-radius:999px;
+      background:rgba(22,163,74,.08);
+      font-weight:950;
+      color:#0f172a;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:76px;
+    }
+
+    /* ✅ Step 2: keep equation on ONE LINE */
+    .s2Inline{
+      flex-wrap:nowrap !important;
+      white-space:nowrap !important;
+      align-items:center;
+      gap:10px;
+    }
+    .s2Inline .blank.tiny{
+      width:58px;
+      height:34px;
+    }
+
+    /* Rail */
+    button{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:13px;
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:0 10px 18px rgba(2,6,23,.08);
+      white-space:nowrap;
+      touch-action:manipulation;
+      user-select:none;
+    }
+    button.primary{
+      background:linear-gradient(180deg, rgba(14,165,233,.96), rgba(14,165,233,.82));
+      border-color: rgba(14,165,233,.6);
+      color:#fff;
+    }
+    button.good{
+      background:linear-gradient(180deg, rgba(22,163,74,.96), rgba(22,163,74,.82));
+      border-color: rgba(22,163,74,.6);
+      color:#fff;
+    }
+    button.ghost{ background:rgba(255,255,255,.78); }
+    button.warn{
+      background:linear-gradient(180deg, rgba(245,158,11,.96), rgba(245,158,11,.82));
+      border-color: rgba(245,158,11,.6);
+      color:#fff;
+    }
+
+    .rail{
+      height:100%;
+      background: rgba(255,255,255,.94);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:9px;
+      overflow:hidden;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      gap:8px;
+      min-height:0;
+    }
+    .railTitle{
+      font-weight:950;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+    .railBtns{ display:grid; gap:8px; align-content:start; }
+    .railBtns button{
+      width:100%;
+      padding:10px 10px;
+      font-size:12px;
+      border-radius:14px;
+    }
+    .railFooter{ display:grid; gap:8px; }
+    .feedback{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:8px 9px;
+      background: rgba(255,255,255,.88);
+      color:var(--muted);
+      font-size:10.8px;
+      line-height:1.25;
+      height:102px;
+      overflow:hidden;
+    }
+    .feedback strong{ color:var(--ink); }
+    .creditInline{
+      margin-top:4px;
+      font-size:11px;
+      color:var(--muted);
+      text-align:center;
+      user-select:none;
+    }
+
+    .confetti{
+      position:fixed; inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index: 9999;
+    }
+    .confetti i{
+      position:absolute; top:-12px;
+      width:10px; height:14px;
+      border-radius:3px;
+      opacity:.95;
+      animation: fall 1100ms linear forwards;
+    }
+    @keyframes fall{
+      to{ transform: translateY(110vh) rotate(260deg); opacity:1; }
+    }
+
+    /* Mobile */
+    #panel.smallMode .layout{ grid-template-columns: 1fr; }
+    #panel.smallMode .hint{ display:none; }
+    #panel.smallMode .mid{ grid-template-columns: 1fr; }
+    #panel.smallMode .stepsCol{ grid-template-rows: auto auto; }
+    #panel.smallMode .rail{ grid-template-rows: auto auto; height:auto; }
+    #panel.smallMode .railBtns{ grid-template-columns: repeat(3, 1fr); gap:8px; }
+    #panel.smallMode .railFooter{ grid-template-columns: 1fr 1fr; align-items:stretch; }
+    #panel.smallMode .bondBox{ height:205px; }
+
+    #xapiBase{ display:none!important; }
+  </style>
+</head>
+
+<body>
+  <div class="viewport">
+    <div class="stageWrap" id="stageWrap">
+      <div class="stage" id="stage">
+
+        <div class="topbar">
+          <div>
+            <div class="title">Subtraction Technique 1 (Subtract the tens, then subtract the ones)</div>
+            <div class="subtitle">Split the second number into tens and ones. Subtract tens first, then ones.</div>
+          </div>
+          <div class="badges">
+            <div class="pill"><span style="font-weight:950">Showing</span> <span id="showingPill">1/15</span></div>
+            <div class="pill"><span class="dot" id="statusDot"></span><span id="statusText">Not checked</span></div>
+            <div class="pill"><span style="font-weight:950">Score</span> <span id="scorePill">0</span></div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel">
+          <div class="layout">
+
+            <!-- MAIN -->
+            <div class="mainCard">
+              <div class="qHeader">
+                <div class="eqBig" aria-label="question equation">
+                  <span id="M">98</span>
+                  <span class="op">−</span>
+                  <span id="S">72</span>
+                </div>
+                <div class="hint" id="hintText">Tip: Split the second number into tens and ones. Do M − tens, then result − ones.</div>
+              </div>
+
+              <div class="mid">
+                <!-- LEFT -->
+                <div class="leftBoard">
+
+                  <!-- Number bond for S -->
+                  <div class="bondBox" aria-label="number bond for the second number">
+                    <svg viewBox="0 0 520 220" width="100%" height="220" role="img" aria-label="Number bond">
+                      <defs>
+                        <linearGradient id="gLine" x1="0" x2="1">
+                          <stop offset="0" stop-color="rgba(14,165,233,0.95)"/>
+                          <stop offset="1" stop-color="rgba(168,85,247,0.92)"/>
+                        </linearGradient>
+
+                        <radialGradient id="gNode" cx="30%" cy="30%">
+                          <stop offset="0" stop-color="#ffffff"/>
+                          <stop offset="1" stop-color="rgba(240,253,250,0.94)"/>
+                        </radialGradient>
+
+                        <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+                          <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="rgba(2,6,23,0.16)"/>
+                        </filter>
+                      </defs>
+
+                      <!-- connectors -->
+                      <path d="M260 48 C212 78, 186 110, 168 150" fill="none" stroke="url(#gLine)" stroke-width="10" stroke-linecap="round" opacity="0.92"/>
+                      <path d="M260 48 C308 78, 334 110, 352 150" fill="none" stroke="url(#gLine)" stroke-width="10" stroke-linecap="round" opacity="0.92"/>
+
+                      <!-- TOP: S -->
+                      <g filter="url(#shadow)">
+                        <circle cx="260" cy="52" r="46" fill="url(#gNode)" stroke="rgba(22,163,74,0.55)" stroke-width="9"/>
+                        <text x="260" y="60" text-anchor="middle" font-size="28" font-weight="950" fill="#0f172a" id="S_top">72</text>
+                      </g>
+
+                      <!-- LEFT: tens -->
+                      <g filter="url(#shadow)">
+                        <circle cx="168" cy="156" r="56" fill="url(#gNode)" stroke="rgba(245,158,11,0.55)" stroke-width="10"/>
+                        <text x="168" y="128" text-anchor="middle" font-size="14" font-weight="900" fill="#64748b">tens</text>
+                        <foreignObject x="126" y="142" width="84" height="60">
+                          <div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;justify-content:center;">
+                            <input class="blank pillLike" id="tens" inputmode="numeric" autocomplete="off" aria-label="tens part"/>
+                          </div>
+                        </foreignObject>
+                      </g>
+
+                      <!-- RIGHT: ones -->
+                      <g filter="url(#shadow)">
+                        <circle cx="352" cy="156" r="56" fill="url(#gNode)" stroke="rgba(14,165,233,0.55)" stroke-width="10"/>
+                        <text x="352" y="128" text-anchor="middle" font-size="14" font-weight="900" fill="#64748b">ones</text>
+                        <foreignObject x="310" y="142" width="84" height="60">
+                          <div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;justify-content:center;">
+                            <input class="blank pillLike" id="ones" inputmode="numeric" autocomplete="off" aria-label="ones part"/>
+                          </div>
+                        </foreignObject>
+                      </g>
+                    </svg>
+                  </div>
+
+                  <!-- ✅ Working (crossed-out equation removed) -->
+                  <div class="workLines" aria-label="working">
+                    <div class="eqRow">
+                      <span id="M_w2" class="dim">98</span>
+                      <span class="dim">−</span>
+                      <input class="blank tiny" id="w_tens2" inputmode="numeric" autocomplete="off" aria-label="tens in working"/>
+                      <span class="dim">=</span>
+                      <input class="blank tiny pillLike" id="w_afterTens2" inputmode="numeric" autocomplete="off" aria-label="result after subtracting tens"/>
+                    </div>
+
+                    <div class="eqRow">
+                      
+                      <input class="blank tiny pillLike" id="w_afterTens3" inputmode="numeric" autocomplete="off" aria-label="same result after tens"/>
+                      <span class="dim">−</span>
+                      <input class="blank tiny" id="w_ones" inputmode="numeric" autocomplete="off" aria-label="ones in working"/>
+                      <span class="dim">=</span>
+                      <input class="blank tiny pillLike" id="w_final" inputmode="numeric" autocomplete="off" aria-label="final answer"/>
+                    </div>
+                  </div>
+
+                  <div class="finalPill" aria-label="final equation">
+                    <span id="Mfinal">98</span>
+                    <span class="op">−</span>
+                    <span id="Sfinal">72</span>
+                    <span class="op">=</span>
+                    <input class="blank pillLike" id="finalAns" inputmode="numeric" autocomplete="off" aria-label="final answer in final equation"/>
+                  </div>
+                </div>
+
+                <!-- RIGHT: step cards -->
+                <div class="stepsCol" aria-label="step cards">
+                  <div class="stepCard orange">
+                    <div class="stepTitle orange"><span class="label">STEP 1</span></div>
+                    <div class="stepDesc">Subtract the tens of the second number from the first number.</div>
+                    <div class="stepEq">
+                      <div class="row">
+                        <span id="M_step1">98</span>
+                        <span class="dim">−</span>
+                        <input class="blank pillLike" id="s1_tens" inputmode="numeric" autocomplete="off" aria-label="tens in step 1"/>
+                        <span class="dim">=</span>
+                        <input class="blank pillLike" id="s1_afterTens" inputmode="numeric" autocomplete="off" aria-label="result after tens subtraction"/>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="stepCard blue">
+                    <div class="stepTitle blue"><span class="label">STEP 2</span></div>
+                    <div class="stepDesc">Subtract the ones.</div>
+                    <div class="stepEq">
+                      <!-- ✅ on ONE LINE -->
+                      <div class="row s2Inline">
+                        <input class="blank pillLike" id="s2_afterTens" inputmode="numeric" autocomplete="off" aria-label="result after tens (step 2)"/>
+                        <span class="dim">−</span>
+                        <input class="blank tiny" id="s2_ones" inputmode="numeric" autocomplete="off" aria-label="ones (step 2)"/>
+                        <span class="dim">=</span>
+                        <input class="blank pillLike" id="s2_final" inputmode="numeric" autocomplete="off" aria-label="final result (step 2)"/>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- BUTTON RAIL -->
+            <div class="rail" aria-label="controls">
+              <div class="railTitle">
+                <span>Controls</span>
+                <span style="color:var(--muted); font-size:11px;">Step-by-step</span>
+              </div>
+
+              <div class="railBtns">
+                <button class="primary" id="btnCheck" type="button">Check</button>
+                <button class="warn" id="btnNext" type="button">Next ▶</button>
+                <button class="ghost" id="btnClear" type="button">Clear</button>
+                <button class="ghost" id="btnShowAll" type="button">Show all</button>
+                <button class="good" id="btnNew" type="button">New</button>
+              </div>
+
+              <div class="railFooter">
+                <div class="feedback" id="fb">
+                  <strong>Goal:</strong> Fill the blue boxes. Split the second number into tens and ones, then subtract tens, then ones.
+                </div>
+                <div class="creditInline">Designed by Lim Kim Sze © 2026</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="confetti" id="confetti"></div>
+        </div>
+
+        <!-- Hidden xAPI base -->
+        <div id="xapiBase">
+          <script src="xapiwrapper.min.js"></script>
+          <script src="index.js"></script>
+          <div><label>score</label><input id="score-input" value="0"></div>
+          <div><label>feedback</label><input id="feedback-input" value="Well done!"></div>
+          <button id="sendBtn" type="button">Send/Save</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Sound kit (generic) -->
+  <script>
+    let audioCtx = null;
+    function ensureAudio(){
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      return audioCtx;
+    }
+    function beep(freq=660, ms=120, type="sine", gainVal=0.06){
+      const ctx = ensureAudio();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = type; o.frequency.value = freq; g.gain.value = gainVal;
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      setTimeout(()=>{ try{o.stop();}catch(e){} }, ms);
+    }
+    function sfxCorrect(){ try{ beep(740,110,"triangle",0.07); setTimeout(()=>beep(990,130,"triangle",0.06),120);}catch(e){} }
+    function sfxWrong(){ try{ beep(220,180,"sawtooth",0.05);}catch(e){} }
+    function sfxClock(){ try{ beep(520,70,"square",0.03);}catch(e){} }
+  </script>
+
+  <script>
+    const ACTIVITY_ID = "https://limkimsze-maker.github.io/Subtract_Tens_Then_Ones_Method1/";
+    const $ = (id)=>document.getElementById(id);
+
+    const TOTAL = 15;
+    const state = {
+      M: 98,
+      S: 72,
+      tens: 70,
+      ones: 2,
+      afterTens: 28,
+      final: 26
+    };
+
+    // ✅ Blue boxes (inputs)
+    const fieldIds = [
+      "tens","ones",
+      "w_tens2","w_afterTens2","w_afterTens3","w_ones","w_final",
+      "s1_tens","s1_afterTens",
+      "s2_afterTens","s2_ones","s2_final",
+      "finalAns"
+    ];
+
+    let revealPlan = [];
+    let nextIndex = 0;
+    let qIndex = 1;
+
+    function lockScroll(){
+      try{
+        document.addEventListener("wheel", (e)=>{ e.preventDefault(); }, {passive:false});
+        document.addEventListener("touchmove", (e)=>{
+          const t = e.target;
+          if(t && (t.tagName==="INPUT" || t.tagName==="BUTTON")) return;
+          e.preventDefault();
+        }, {passive:false});
+      }catch(e){}
+    }
+
+    function scaleStage(){
+      const stage = $("stage");
+      const wrap  = $("stageWrap");
+      const panel = $("panel");
+
+      const vv = window.visualViewport;
+      const vw = (vv ? vv.width : window.innerWidth);
+      const vh = (vv ? vv.height : window.innerHeight);
+
+      const designW = 920, designH = 560;
+      const margin = 10;
+
+      const scale = Math.min((vw - margin*2)/designW, (vh - margin*2)/designH);
+      const s = Math.max(0.24, scale);
+
+      wrap.style.width  = (designW * s) + "px";
+      wrap.style.height = (designH * s) + "px";
+      stage.style.transform = `scale(${s})`;
+
+      const small = (vw < 860) || (s < 0.78);
+      panel.classList.toggle("smallMode", small);
+    }
+    window.addEventListener("resize", scaleStage);
+    if(window.visualViewport){
+      window.visualViewport.addEventListener("resize", scaleStage);
+      window.visualViewport.addEventListener("scroll", scaleStage);
+    }
+
+    function clampInt(v){
+      if(v === "" || v == null) return null;
+      const n = parseInt(String(v).replace(/[^\d\-]/g,""),10);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function setStatus(ok, msg){
+      $("statusDot").classList.toggle("ok", !!ok);
+      $("statusText").textContent = msg;
+    }
+
+    function resetFieldStyles(){
+      fieldIds.forEach(id=> $(id).classList.remove("okField","badField"));
+    }
+
+    function mark(elId, ok){
+      const el = $(elId);
+      el.classList.add(ok ? "okField" : "badField");
+      return ok ? 1 : 0;
+    }
+
+    function setScore(score, feedback){
+      $("scorePill").textContent = String(score);
+      const scoreInput = $("score-input");
+      const fbInput = $("feedback-input");
+      if(scoreInput) scoreInput.value = String(score);
+      if(fbInput) fbInput.value = String(feedback || "Well done!");
+      try{
+        if(typeof storeState === "function"){
+          storeState({ score, feedback: String(feedback || "Well done!"), activityId: ACTIVITY_ID, ts: Date.now() });
+        }
+      }catch(e){}
+    }
+
+    function showConfetti(){
+      const host = $("confetti");
+      host.innerHTML = "";
+      for(let i=0;i<42;i++){
+        const el = document.createElement("i");
+        el.style.left = (Math.random()*100) + "%";
+        el.style.animationDuration = (900 + Math.random()*500) + "ms";
+        el.style.background = (Math.random() < .5) ? "rgba(14,165,233,.95)" : "rgba(168,85,247,.90)";
+        el.style.opacity = (0.75 + Math.random()*0.25).toFixed(2);
+        host.appendChild(el);
+      }
+      setTimeout(()=>{ host.innerHTML=""; }, 1350);
+    }
+
+    function updateTexts(){
+      $("M").textContent = state.M;
+      $("S").textContent = state.S;
+
+      $("S_top").textContent = state.S;
+
+      $("M_w2").textContent = state.M;
+      $("M_step1").textContent = state.M;
+
+      $("Mfinal").textContent = state.M;
+      $("Sfinal").textContent = state.S;
+
+      $("showingPill").textContent = `${qIndex}/${TOTAL}`;
+    }
+
+    function buildRevealPlan(){
+      revealPlan = [
+        { id:"tens",         val:()=>state.tens,      msg:()=>`Tens part of ${state.S} is ${state.tens}.` },
+        { id:"ones",         val:()=>state.ones,      msg:()=>`Ones part of ${state.S} is ${state.ones}.` },
+
+        { id:"s1_tens",      val:()=>state.tens,      msg:()=>`Step 1: subtract ${state.tens} first.` },
+        { id:"s1_afterTens", val:()=>state.afterTens, msg:()=>`${state.M} − ${state.tens} = ${state.afterTens}.` },
+
+        { id:"w_tens2",      val:()=>state.tens,      msg:()=>`Write the tens: ${state.tens}.` },
+        { id:"w_afterTens2", val:()=>state.afterTens, msg:()=>`Result after tens: ${state.afterTens}.` },
+
+        { id:"s2_afterTens", val:()=>state.afterTens, msg:()=>`Step 2 starts with ${state.afterTens}.` },
+        { id:"s2_ones",      val:()=>state.ones,      msg:()=>`Subtract the ones: ${state.ones}.` },
+        { id:"s2_final",     val:()=>state.final,     msg:()=>`${state.afterTens} − ${state.ones} = ${state.final}.` },
+
+        { id:"w_afterTens3", val:()=>state.afterTens, msg:()=>`Carry down ${state.afterTens}.` },
+        { id:"w_ones",       val:()=>state.ones,      msg:()=>`Write the ones: ${state.ones}.` },
+        { id:"w_final",      val:()=>state.final,     msg:()=>`Final answer: ${state.final}.` },
+
+        { id:"finalAns",     val:()=>state.final,     msg:()=>`So ${state.M} − ${state.S} = ${state.final}.` },
+      ];
+      nextIndex = 0;
+    }
+
+    function clearBlanks(){
+      fieldIds.forEach(id=> $(id).value = "");
+      resetFieldStyles();
+      setStatus(false, "Cleared");
+      $("fb").innerHTML = "<strong>Cleared.</strong> Fill in the blue boxes again.";
+      setScore(0, "Well done!");
+      buildRevealPlan();
+      if(sessionStorage.getItem("UFCO-audio-unlocked")==="1") sfxClock();
+    }
+
+    function showAllAnswers(){
+      $("tens").value = state.tens;
+      $("ones").value = state.ones;
+
+      $("w_tens2").value = state.tens;
+      $("w_afterTens2").value = state.afterTens;
+      $("w_afterTens3").value = state.afterTens;
+      $("w_ones").value = state.ones;
+      $("w_final").value = state.final;
+
+      $("s1_tens").value = state.tens;
+      $("s1_afterTens").value = state.afterTens;
+
+      $("s2_afterTens").value = state.afterTens;
+      $("s2_ones").value = state.ones;
+      $("s2_final").value = state.final;
+
+      $("finalAns").value = state.final;
+
+      resetFieldStyles();
+      fieldIds.forEach(id=> $(id).classList.add("okField"));
+
+      $("fb").innerHTML =
+        `<strong>All shown:</strong> ${state.S} = ${state.tens} + ${state.ones}. Then ${state.M} − ${state.tens} = ${state.afterTens}, and ${state.afterTens} − ${state.ones} = ${state.final}.`;
+      setStatus(false, "All answers shown");
+      nextIndex = revealPlan.length;
+      if(sessionStorage.getItem("UFCO-audio-unlocked")==="1") sfxClock();
+    }
+
+    function revealNext(){
+      if(nextIndex >= revealPlan.length){
+        setStatus(true, "All steps shown");
+        $("fb").innerHTML = "<strong>All steps shown.</strong> Press Clear to try again, or Next ▶ to move on.";
+        if(sessionStorage.getItem("UFCO-audio-unlocked")==="1") sfxClock();
+        return;
+      }
+      const step = revealPlan[nextIndex];
+      const el = $(step.id);
+      el.value = String(step.val());
+      el.classList.remove("badField");
+      el.classList.add("okField");
+      $("fb").innerHTML = `<strong>Next:</strong> ${step.msg()}`;
+      setStatus(false, `Showing ${nextIndex+1}/${revealPlan.length}`);
+      nextIndex++;
+      if(sessionStorage.getItem("UFCO-audio-unlocked")==="1") sfxClock();
+    }
+
+    function setProblem(M,S){
+      state.M = M;
+      state.S = S;
+      state.tens = Math.floor(S/10)*10;
+      state.ones = S % 10;
+      state.afterTens = M - state.tens;
+      state.final = state.afterTens - state.ones;
+
+      updateTexts();
+      clearBlanks();
+      setStatus(false, "Not checked");
+      $("fb").innerHTML = "<strong>Goal:</strong> Fill in the blue boxes. Split the second number into tens and ones, then subtract tens, then ones.";
+    }
+
+    function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+    // Generate 2-digit subtraction WITHOUT regrouping (so Method 1 stays clean)
+    function newQuestion(){
+      // Choose M between 50–99
+      const M = randInt(50, 99);
+
+      // Choose tens of S <= tens of M, and ones of S <= ones of M
+      const M_tens = Math.floor(M/10)*10;
+      const M_ones = M % 10;
+
+      const sTensChoices = [];
+      for(let t=10; t<=M_tens; t+=10) sTensChoices.push(t);
+
+      let tens = sTensChoices[randInt(0, sTensChoices.length-1)];
+      let ones = randInt(0, M_ones);
+
+      // ensure S is at least 10 and not 0
+      if(tens === 0) tens = 10;
+      if(tens === 10 && ones === 0) ones = Math.min(1, M_ones);
+
+      let S = tens + ones;
+      if(S <= 0 || S >= M){
+        // quick fix: make S a bit smaller
+        ones = Math.max(0, Math.min(M_ones, ones-1));
+        S = tens + ones;
+        if(S >= M){
+          tens = Math.max(10, tens-10);
+          S = tens + ones;
+        }
+      }
+
+      qIndex++;
+      if(qIndex > TOTAL) qIndex = 1;
+
+      setProblem(M, S);
+    }
+
+    function checkAll(){
+      resetFieldStyles();
+
+      const tens = clampInt($("tens").value);
+      const ones = clampInt($("ones").value);
+
+      const w_tens2 = clampInt($("w_tens2").value);
+      const w_afterTens2 = clampInt($("w_afterTens2").value);
+      const w_afterTens3 = clampInt($("w_afterTens3").value);
+      const w_ones = clampInt($("w_ones").value);
+      const w_final = clampInt($("w_final").value);
+
+      const s1_tens = clampInt($("s1_tens").value);
+      const s1_afterTens = clampInt($("s1_afterTens").value);
+
+      const s2_afterTens = clampInt($("s2_afterTens").value);
+      const s2_ones = clampInt($("s2_ones").value);
+      const s2_final = clampInt($("s2_final").value);
+
+      const finalAns = clampInt($("finalAns").value);
+
+      let okCount = 0;
+      const total = fieldIds.length;
+
+      okCount += mark("tens", tens === state.tens);
+      okCount += mark("ones", ones === state.ones);
+
+      okCount += mark("w_tens2", w_tens2 === state.tens);
+      okCount += mark("w_afterTens2", w_afterTens2 === state.afterTens);
+      okCount += mark("w_afterTens3", w_afterTens3 === state.afterTens);
+      okCount += mark("w_ones", w_ones === state.ones);
+      okCount += mark("w_final", w_final === state.final);
+
+      okCount += mark("s1_tens", s1_tens === state.tens);
+      okCount += mark("s1_afterTens", s1_afterTens === state.afterTens);
+
+      okCount += mark("s2_afterTens", s2_afterTens === state.afterTens);
+      okCount += mark("s2_ones", s2_ones === state.ones);
+      okCount += mark("s2_final", s2_final === state.final);
+
+      okCount += mark("finalAns", finalAns === state.final);
+
+      if(okCount === total){
+        setStatus(true, "✅ All correct!");
+        $("fb").innerHTML = "<strong>Correct!</strong> Subtract the tens first, then subtract the ones. 🎉";
+        if(sessionStorage.getItem("UFCO-audio-unlocked")==="1") sfxCorrect();
+        showConfetti();
+        setScore(1, "Success");
+      }else{
+        setStatus(false, `Try again (${okCount}/${total} correct)`);
+        $("fb").innerHTML = `<strong>Keep going.</strong> Split ${state.S} into tens and ones. Then ${state.M} − tens, then subtract ones.`;
+        if(sessionStorage.getItem("UFCO-audio-unlocked")==="1") sfxWrong();
+        setScore(0, "Well done!");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", ()=>{
+      lockScroll();
+
+      // ✅ Sound by default (resume on first interaction)
+      sessionStorage.setItem("UFCO-audio-unlocked","1");
+      (function(){
+        let armed = false;
+        const arm = () => {
+          if(armed) return;
+          armed = true;
+          try{
+            const ctx = ensureAudio();
+            ctx.resume && ctx.resume().catch(()=>{});
+          }catch(e){}
+        };
+        window.addEventListener("pointerdown", arm, { once:true, capture:true });
+        window.addEventListener("keydown", arm, { once:true, capture:true });
+      })();
+
+      $("btnCheck").addEventListener("click", checkAll);
+
+      // ✅ Next reveals step-by-step first; after all revealed, it moves to next question
+      $("btnNext").addEventListener("click", ()=>{
+        if(nextIndex < revealPlan.length){
+          revealNext();
+          return;
+        }
+        newQuestion();
+      });
+
+      $("btnClear").addEventListener("click", clearBlanks);
+      $("btnShowAll").addEventListener("click", showAllAnswers);
+
+      // New resets to a fresh session question (and resets showing to 1/15)
+      $("btnNew").addEventListener("click", ()=>{
+        qIndex = 1;
+        newQuestion();
+        qIndex = 1; // keep it at 1/15 for a new session start
+        updateTexts();
+      });
+
+      fieldIds.forEach(id=>{
+        $(id).addEventListener("keydown", (e)=>{
+          if(e.key==="Enter"){ e.preventDefault(); checkAll(); }
+        });
+      });
+
+      scaleStage();
+      buildRevealPlan();
+      setProblem(98,72);
+    });
+  </script>
+</body>
+</html>
